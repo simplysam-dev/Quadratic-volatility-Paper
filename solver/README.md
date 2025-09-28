@@ -1,143 +1,197 @@
-# QNV Solver: Production-Grade Implementation
+# QNV Solver - Production-Grade Implementation
 
-This directory contains a complete production-grade implementation of the Quadratic Normal Volatility (QNV) model solver using the confluent Heun equation mapping derived in the accompanying paper.
+## Overview
 
-## Files Overview
-
-### Core Implementation
-- **`qnv_solver.py`** - Main solver implementation with all core classes and methods
-- **`qnv_usage_example.py`** - Comprehensive usage examples and demonstrations
-
-### Documentation
-- **`main.tex`** - Complete LaTeX paper with mathematical derivation
-- **`main.pdf`** - Compiled PDF of the mathematical paper
-
-### Generated Outputs
-- **`qnv_test_case_*.png`** - Diagnostic plots from synthetic test cases
-- **`qnv_usage_example.png`** - Comprehensive diagnostic dashboard
-- **`qnv_smile_comparison.png`** - Volatility smile analysis comparison
+This directory contains a **production-grade implementation** of the Quadratic Normal Volatility (QNV) model solver using the confluent Heun equation mapping. The implementation features optimal numerical schemes, comprehensive diagnostics, and intelligent method selection.
 
 ## Key Features
 
-### 🎯 **Automatic Method Selection**
-The solver automatically chooses the optimal solution method based on parameter analysis:
-- **Heun Series**: For rapidly converging cases
-- **Polynomial Solutions**: When exact solutions exist
-- **Pöschl-Teller**: For symmetric cases (r≈0)
-- **PDE Finite Difference**: For general cases requiring numerical solution
+### 🚀 **Production-Ready Solver**
+- **High-order PDE solver** with BDF2 and Crank-Nicolson schemes
+- **Stable Heun series** with Miller's algorithm and convergence control
+- **Adaptive time stepping** with error control
+- **Intelligent method selection** based on parameter analysis
 
-### 🔧 **Core Classes**
+### 📊 **Comprehensive Diagnostics**
+- **Multi-panel visualization** with 9 diagnostic plots
+- **Volatility smile analysis** (local and implied)
+- **Parameter sensitivity studies**
+- **Time decay analysis**
+- **Convergence diagnostics**
 
-#### `QNVParameters`
-```python
-params = QNVParameters(
-    a=0.00001,    # quadratic coefficient (controls smile convexity)
-    b=0.01,       # linear coefficient (controls skew)
-    c=0.2,        # constant coefficient (base volatility level)
-    r=0.02,       # risk-free rate
-    S0=100,       # current spot price
-    F=100         # forward price
-)
-```
+### 🔬 **Mathematical Rigor**
+- **Correct Heun parameter computation** matching paper equations
+- **Proper boundary conditions** for call options
+- **Energy estimation** based on boundary conditions
+- **Polynomial case detection** for special parameter regimes
 
-#### `QNVSolver`
-Main solver class that:
-- Converts QNV parameters to Heun equation parameters
-- Implements three-term recurrence relation for series solutions
-- Detects polynomial termination conditions
-- Provides comprehensive error handling and validation
+## Files
 
-#### `FiniteDifferenceSolver`
-High-performance PDE solver using:
-- Crank-Nicolson scheme for maximum stability
-- Adaptive time stepping
-- Optimized tridiagonal matrix solving
-- Production-ready boundary condition handling
+### Core Implementation
+- **`qnv_solver.py`** - Main solver implementation with all classes and methods
+- **`qnv_usage_example.py`** - Comprehensive usage examples and demonstrations
 
-#### `AdaptiveSolverSelector`
-Intelligent method recommendation based on:
-- Parameter regime analysis
-- Convergence condition checking
-- Special case detection (symmetric, polynomial)
+### Documentation
+- **`main.tex`** - Complete mathematical derivation (LaTeX source)
+- **`main.pdf`** - Compiled mathematical paper
+- **`README.md`** - This documentation file
 
-#### `QNVVisualizer`
-Comprehensive diagnostic visualization:
-- Volatility smile plots
-- Quantum potential landscape
-- Heun function solutions
-- Parameter sensitivity analysis
-- Convergence diagnostics
+### Generated Analysis
+- **`qnv_test_case_*_comprehensive.png`** - Comprehensive diagnostic dashboards for test cases
+- **`volatility_smile_analysis.png`** - Volatility smile analysis
+- **`parameter_sensitivity.png`** - Parameter sensitivity studies
+- **`time_decay_analysis.png`** - Time decay analysis
+- **`comprehensive_dashboard.png`** - Full diagnostic dashboard
 
 ## Quick Start
 
 ### Basic Usage
+
 ```python
-from qnv_solver import QNVParameters, QNVSolver, AdaptiveSolverSelector
+from qnv_solver import QNVParameters, AdaptiveSolver
 
-# Define model parameters
-params = QNVParameters(a=0.00001, b=0.01, c=0.2, r=0.02, S0=100, F=100)
+# Define QNV parameters
+params = QNVParameters(
+    a=0.00001,    # quadratic coefficient
+    b=0.01,       # linear coefficient
+    c=0.2,        # constant coefficient
+    r=0.02,       # risk-free rate
+    S0=100,       # spot price
+    F=100,        # forward price
+    T=0.25        # time to maturity
+)
 
-# Initialize solver
-solver = QNVSolver(params)
+# Create solver
+solver = AdaptiveSolver(params)
 
-# Get method recommendation
-selector = AdaptiveSolverSelector(params)
-recommendation = selector.recommend_method()
-print(f"Recommended method: {recommendation['primary']}")
-
-# Solve using recommended method
-if recommendation['primary'] == 'heun_series':
-    y, solution = solver.solve_heun_series(y_max=0.5, n_terms=30)
+# Price options
+K = 100  # strike price
+price = solver.solve(K)
+print(f"Call price: {price:.4f}")
 ```
 
-### Option Pricing
-```python
-from qnv_solver import FiniteDifferenceSolver
+### Comprehensive Analysis
 
-# Initialize PDE solver
-pde_solver = FiniteDifferenceSolver(params, S_min=50, S_max=150, n_points=200)
-
-# Price European call option
-prices = pde_solver.price_european_call(K=100, T=0.25)
-```
-
-### Diagnostic Analysis
 ```python
 from qnv_solver import QNVVisualizer
 
-# Create comprehensive diagnostic plots
-visualizer = QNVVisualizer(solver)
-fig = visualizer.create_diagnostic_dashboard()
-plt.savefig('qnv_analysis.png', dpi=300, bbox_inches='tight')
+# Create visualizer
+visualizer = QNVVisualizer(params)
+
+# Generate comprehensive dashboard
+fig = visualizer.create_comprehensive_dashboard()
 ```
 
-## Mathematical Foundation
+## Test Suite
 
-The solver implements the complete mathematical framework from the paper:
+Run the comprehensive test suite:
+
+```bash
+python3 qnv_solver.py
+```
+
+This will:
+- Test 5 different parameter regimes
+- Generate comprehensive diagnostic plots
+- Display Heun parameters and polynomial case detection
+- Show option pricing results across strikes
+
+## Usage Examples
+
+Run the enhanced usage examples:
+
+```bash
+python3 qnv_usage_example.py
+```
+
+This includes:
+1. **Basic option pricing** across different strikes
+2. **Volatility smile analysis** with local and implied volatilities
+3. **Parameter sensitivity studies** for coefficients a and b
+4. **Time decay analysis** for different strikes
+5. **Comprehensive diagnostic dashboard** with 9 analysis panels
+
+## Solver Methods
+
+### Automatic Method Selection
+
+The solver automatically selects the optimal method based on parameters:
+
+- **`heun_series`** - For symmetric cases (r≈0) or short maturities
+- **`pde_high_order`** - For general cases requiring numerical PDE solution
+- **`analytic_approx`** - For quick approximations using Black-Scholes with local vol
+
+### Manual Method Selection
+
+```python
+# Force specific method
+price = solver.solve(K, method='pde_high_order')
+price = solver.solve(K, method='heun_series')
+price = solver.solve(K, method='analytic_approx')
+```
+
+## Numerical Schemes
+
+### PDE Solver
+- **BDF2** (2nd-order Backward Differentiation Formula) - Most stable
+- **Crank-Nicolson** - Balanced accuracy and stability
+- **Implicit Euler** - Conservative fallback
+- **4th-order compact spatial discretization**
+- **Adaptive time stepping** with error control
+
+### Heun Series
+- **Miller's algorithm** for backward recurrence (more stable)
+- **Horner's scheme** for polynomial evaluation
+- **Convergence control** with coefficient rescaling
+- **Polynomial case detection** for special parameters
+
+## Parameter Validation
+
+The solver includes comprehensive parameter validation:
+
+```python
+# Invalid parameters will raise exceptions
+try:
+    params = QNVParameters(a=-0.1, b=0.01, c=0.2, r=0.02, S0=100, F=100, T=0.25)
+except ValueError as e:
+    print(f"Parameter error: {e}")
+```
+
+## Visualization Features
+
+### Comprehensive Dashboard (9 panels)
+1. **Volatility Smile** - Local volatility vs strike
+2. **Option Prices** - Call prices across strikes
+3. **Implied Volatility Smile** - Implied vols vs strike
+4. **Potential Landscape** - Quantum potential V(t)
+5. **Heun Parameters** - γ, δ, ε, α_H, q values
+6. **Heun Solutions** - Series solution plots
+7. **Parameter Sensitivity** - Price vs parameter changes
+8. **Time Decay** - Price evolution over time
+9. **Convergence Analysis** - Error vs grid resolution
+
+### Individual Analysis Plots
+- Volatility smile analysis
+- Parameter sensitivity studies
+- Time decay analysis
+- Comprehensive diagnostic dashboards
+
+## Mathematical Background
+
+The implementation is based on the mathematical derivation in `main.pdf`, which shows:
 
 1. **QNV Model**: σ(S) = aS² + bS + c
-2. **Confluent Heun Mapping**: Automatic conversion to Heun equation parameters
-3. **Series Solutions**: Three-term recurrence relation implementation
-4. **Polynomial Cases**: Detection and exact solution computation
-5. **Symmetric Limit**: Pöschl-Teller reduction when r→0
+2. **Confluent Heun Mapping**: Transforms the Black-Scholes PDE to the confluent Heun equation
+3. **Parameter Relationships**: Exact formulas connecting QNV parameters to Heun parameters
+4. **Special Cases**: Polynomial solutions, symmetric cases, and asymptotic behavior
 
-## Test Results
+## Performance Characteristics
 
-The synthetic test suite validates the solver across different parameter regimes:
-
-- ✅ **Symmetric Case (r=0)**: Correctly reduces to Pöschl-Teller
-- ✅ **Asymmetric Case (r>0)**: Handles δ-ε asymmetry properly
-- ✅ **Near-Polynomial**: Detects special parameter conditions
-- ✅ **Convergence**: Automatic rescaling prevents overflow
-- ✅ **Visualization**: Comprehensive diagnostic plots generated
-
-## Production Features
-
-- **Error Handling**: Comprehensive validation and graceful failure modes
-- **Logging**: Detailed progress tracking and warning system
-- **Performance**: Optimized algorithms for production use
-- **Scalability**: Handles large parameter ranges and grid sizes
-- **Documentation**: Extensive docstrings and usage examples
+- **High accuracy** with 4th-order spatial discretization
+- **Stable time stepping** with adaptive control
+- **Efficient linear algebra** using optimized scipy routines
+- **Intelligent method selection** for optimal performance
+- **Comprehensive error handling** and validation
 
 ## Requirements
 
@@ -146,25 +200,6 @@ The synthetic test suite validates the solver across different parameter regimes
 - SciPy
 - Matplotlib
 
-## Usage Examples
+## License
 
-Run the comprehensive test suite:
-```bash
-python3 qnv_solver.py
-```
-
-Run usage examples:
-```bash
-python3 qnv_usage_example.py
-```
-
-## Mathematical Validation
-
-The implementation has been validated against:
-- Theoretical convergence conditions
-- Special case reductions (Pöschl-Teller limit)
-- Parameter sensitivity analysis
-- Volatility smile structure verification
-- Heun parameter mapping accuracy
-
-This production-grade solver provides a complete bridge from mathematical theory to practical implementation, enabling both research and commercial applications of the QNV model.
+This implementation is part of the Quadratic Volatility Paper research project.
